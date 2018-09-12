@@ -38,8 +38,13 @@ pub fn backspace(screen: &mut Screen) -> Result<(), Error> {
     Ok(())
 }
 
+<<<<<<< HEAD
 pub fn not_found<C: fmt::Display>(screen: &mut Screen, command: &C) -> Result<(), Error> {
     write!(screen, "ysh: command not found: {}", command)?;
+=======
+pub fn not_found(screen: &mut Screen, command: &str) -> Result<(), Error> {
+    screen.write(format!("ysh: command not found: {}", command).as_bytes())?;
+>>>>>>> parent of fa01765... term: Don't allocate a string when writing not_found errors
     newline(screen)?;
     screen.flush()?;
     Ok(())
