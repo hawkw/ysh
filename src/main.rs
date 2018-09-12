@@ -11,9 +11,14 @@ use crossterm::{
 };
 use std::io::Write;
 use duct::cmd;
+
+mod parse;
+mod ast;
 mod term;
 mod st;
 
+use self::parse::Parse;
+use self::ast::{Cmd, Builtin};
 
 fn main() {
     // Put it in raw mode
@@ -46,19 +51,18 @@ fn run(mut screen: Screen) -> Result<(), Error> {
                 }
             },
             '\u{000D}' /* Enter */ => {
-                match str::from_utf8(&line)? {
-                    "" => continue,
-                    "clear" => term::reset(&mut screen)?,
-                    command => {
-                        term::newline(&mut screen)?;
-                        // This will mess up when doing something like:
-                        // echo "hi hello"
-                        // which will be [echo, "hi, hello"] so need to make a
-                        // parse_command function that can handle this stuff better
-                        let args = command.split_whitespace().collect::<Vec<&str>>();
-                        if args.len() == 0 { screen.flush()?; continue; }
+                match Cmd::parse_from(str::from_utf8(&line)?) {
 
-                        cmd(args[0], &args[1..])
+                    Err(e) => {
+                        // TODO(eliza): handle parse errors!
+                        continue;
+                    },
+                    Ok(Cmd::Builtin(Builtin::Clear)) => term::reset(&mut screen)?,
+                    Ok(Cmd::Builtin(Builtin::Cd(_))) => unimplemented!("cd doesnt work yet"),
+                    Ok(Cmd::Invoke(ref c)) => {
+                        term::newline(&mut screen)?;
+
+                        cmd(c.command, c.args.clone())
                             .unchecked()
                             .stdout_capture()
                             .stderr_capture()
@@ -72,7 +76,7 @@ fn run(mut screen: Screen) -> Result<(), Error> {
                                 }
                                 Ok(())
                             })
-                            .or_else(|_: Error| term::not_found(&mut screen, command))?;
+                            .or_else(|_: Error| term::not_found(&mut screen, &c.command.to_string_lossy()))?;
 
                         term::prompt(&mut screen)?;
                     }
