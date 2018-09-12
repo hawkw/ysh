@@ -39,7 +39,7 @@ pub fn backspace(screen: &mut Screen) -> Result<(), Error> {
 }
 
 pub fn not_found<C: fmt::Display>(screen: &mut Screen, command: &C) -> Result<(), Error> {
-    screen.write(format!("ysh: command not found: {}", command).as_bytes())?;
+    write!(screen, "ysh: command not found: {}", command)?;
     newline(screen)?;
     screen.flush()?;
     Ok(())
