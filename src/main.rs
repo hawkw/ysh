@@ -12,6 +12,7 @@ use crossterm::{
 use std::io::Write;
 use duct::cmd;
 mod term;
+mod scope_map;
 mod st;
 
 
