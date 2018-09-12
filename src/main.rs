@@ -14,14 +14,13 @@ use crossterm::{
 use std::io::Write;
 use duct::cmd;
 
-mod parse;
 mod ast;
 mod term;
 mod st;
 mod parse;
 
 use self::{
-    parse::{Parse, Span},
+    parse::Parse,
     ast::{Cmd, Builtin},
 };
 
@@ -66,30 +65,6 @@ fn run(mut screen: Screen) -> Result<(), Error> {
                     Ok(Cmd::Builtin(Builtin::Cd(_))) => unimplemented!("cd doesnt work yet"),
                     Ok(Cmd::Invoke(ref c)) => {
                         term::newline(&mut screen)?;
-
-
-                        //  args is a collection of &'line str snippets --
-                        //  pointers into the line buffer above
-                        let mut args: Vec<&str> = Vec::new();
-                        //  The command binding is used below, so we need a
-                        //  separate cursor for the tokenizing
-                        let mut text: &str = command;
-                        while text.len() > 0 {
-                            //  Use the span tokenizer to get a snippet
-                            let (rest, span) = span(text.into())
-                                //  Suppress the errors for now. May be worth
-                                //  investigating so that the shell can repont
-                                //  invalid syntax?
-                                .map_err(|_| failure::format_err!("Invalid text"))?;
-                                //  rest and span are CompleteStr, which implements
-                                //  Deref down to &str.
-                                args.push(*span);
-                                text = *rest;
-                        }
-                        if args.is_empty() {
-                            screen.flush()?;
-                            continue;
-                        }
                         cmd(c.command, c.args.clone())
                             .unchecked()
                             .stdout_capture()

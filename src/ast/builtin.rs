@@ -1,15 +1,17 @@
-use std::{path::Path, str};
-
-use crate::ast;
-use crate::parse::{Parse, ParseError};
+use std::{path::Path, str, rc::Rc};
+use failure::{
+    Fail,
+};
+use crate::{
+    ast,
+    parse::{Parse, ParseError},
+};
 
 /// Represents all shell builtins.
 #[derive(Clone, Debug)]
 pub enum Builtin<'a> {
     Clear,
     Cd(&'a Path),
-    WithEnv(WithEnv<'a>),
-    // TODO(eliza): add more!
 }
 
 #[derive(Clone, Debug, Fail)]
@@ -38,13 +40,5 @@ impl<'a> Parse<'a> for Builtin<'a> {
             }
             _ => Err(ParseError::Unrecognized),
         }
-    }
-}
-
-impl<'a> Parse<'a> for WithEnv<'a> {
-    type Error = ();
-    fn parse_from(s: &'a str) -> Result<Self, ParseError<Self::Error>> {
-        // TODO(eliza): alex pls implement me
-        unimplemented!()
     }
 }

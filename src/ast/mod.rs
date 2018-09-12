@@ -30,8 +30,8 @@ pub struct WithEnv<'a> {
 }
 
 impl<'a> Parse<'a> for Cmd<'a> {
-    type Error = ();
-    fn parse_from(s: &'a str) -> Result<Self, ParseError<()>> {
+    type Error = String; // placeholder
+    fn parse_from(s: &'a str) -> Result<Self, ParseError<Self::Error>> {
         Builtin::parse_from(s)
             .map(Cmd::Builtin)
             .or_else(|_| Invoke::parse_from(s).map(Cmd::Invoke))
@@ -39,7 +39,7 @@ impl<'a> Parse<'a> for Cmd<'a> {
 }
 
 impl<'a> Parse<'a> for WithEnv<'a> {
-    type Error = ();
+    type Error = String; // placeholder
     fn parse_from(s: &'a str) -> Result<Self, ParseError<Self::Error>> {
         // TODO(eliza): alex pls implement me
         unimplemented!()
